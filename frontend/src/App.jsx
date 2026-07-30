@@ -3,6 +3,9 @@ import axios from 'axios'
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { ExternalLink, TrendingDown, Car, AlertTriangle, Calculator } from 'lucide-react'
 
+// L'URL ta3 Backend ta3ek li raho f Render
+const API_BASE_URL = "https://car-market-pipeline.onrender.com"
+
 function App() {
   const [stats, setStats] = useState(null)
   const [cars, setCars] = useState([])
@@ -13,11 +16,11 @@ function App() {
   const [loadingPredict, setLoadingPredict] = useState(false)
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/stats')
+    axios.get(`${API_BASE_URL}/api/stats`)
       .then(response => setStats(response.data))
       .catch(error => console.error("Erreur API Stats:", error))
 
-    axios.get('http://127.0.0.1:8000/api/cars?limit=200')
+    axios.get(`${API_BASE_URL}/api/cars?limit=200`)
       .then(response => setCars(response.data))
       .catch(error => console.error("Erreur API Cars:", error))
   }, [])
@@ -25,7 +28,7 @@ function App() {
   const handlePredict = (e) => {
     e.preventDefault()
     setLoadingPredict(true)
-    axios.get(`http://127.0.0.1:8000/api/predict?marque=${marque}&annee=${annee}`)
+    axios.get(`${API_BASE_URL}/api/predict?marque=${marque}&annee=${annee}`)
       .then(response => {
         setPredictedPrice(response.data.prix_estime_millions)
         setLoadingPredict(false)
@@ -49,7 +52,7 @@ function App() {
         </div>
 
         {!stats || cars.length === 0 ? (
-          <div className="text-center py-20 text-xl text-slate-500 animate-pulse">Rana njibou f les données...</div>
+          <div className="text-center py-20 text-xl text-slate-500 animate-pulse">Rana njibou f les données men Render...</div>
         ) : (
           <>
             {/* Les Cartes (KPIs) */}
