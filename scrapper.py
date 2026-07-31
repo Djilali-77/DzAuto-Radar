@@ -6,7 +6,7 @@ from playwright.async_api import async_playwright
 async def extract_cars_data():
     async with async_playwright() as p:
         # headless=False opens the browser visibly. Set to True to hide it.
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
         
         cars_list = []
