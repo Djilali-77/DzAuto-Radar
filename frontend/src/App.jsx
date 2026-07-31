@@ -8,7 +8,6 @@ const API_BASE_URL = "https://car-market-pipeline.onrender.com"
 function App() {
   const [stats, setStats] = useState(null)
   const [cars, setCars] = useState([])
-  
   const [brand, setBrand] = useState('Geely')
   const [year, setYear] = useState(2026)
   const [predictedPrice, setPredictedPrice] = useState(null)
@@ -35,7 +34,7 @@ function App() {
       .then(response => setCars(response.data))
       .catch(error => console.error("API Cars Error:", error))
 
-    // 3. Fetch History (Hadi li kanet khassa !)
+    // 3. Fetch History
     axios.get(`${API_BASE_URL}/api/history`)
       .then(response => setHistory(response.data))
       .catch(error => console.error("API History Error:", error))
@@ -54,8 +53,6 @@ function App() {
         setLoadingPredict(false)
       })
   }
-
-  const anomaliesList = cars.filter(car => car.Anomaly === -1)
 
   // Dynamic Theme Classes
   const bgTheme = isDarkMode ? "bg-slate-900" : "bg-gray-50"
@@ -78,18 +75,15 @@ function App() {
   const totalPages = Math.ceil(filteredAnomalies.length / itemsPerPage)
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  
   // Hadi hiya la liste li ghadin n'affichiwha f'le tableau
   const currentAnomalies = filteredAnomalies.slice(indexOfFirstItem, indexOfLastItem)
 
   // Fonction bach n'badlo la page
   const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
-
   return (
     <div className={`min-h-screen p-8 transition-colors duration-300 ${bgTheme}`}>
       <div className="max-w-6xl mx-auto space-y-8">
-        
         {/* Header & Theme Toggle */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-left">
@@ -179,8 +173,9 @@ function App() {
                           backgroundColor: isDarkMode ? '#1e293b' : '#ffffff', 
                           border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0',
                           borderRadius: '8px',
-                          color: isDarkMode ? '#f8fafc' : '#0f172a'
                         }}
+                        itemStyle={{ color: isDarkMode ? '#f8fafc' : '#0f172a' }}
+                        labelStyle={{ color: isDarkMode ? '#f8fafc' : '#0f172a' }}
                       />
                       <Line 
                         type="monotone" 
@@ -285,8 +280,9 @@ function App() {
                           backgroundColor: isDarkMode ? '#1e293b' : '#ffffff', 
                           border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0',
                           borderRadius: '8px',
-                          color: isDarkMode ? '#f8fafc' : '#0f172a'
                         }}
+                        itemStyle={{ color: isDarkMode ? '#f8fafc' : '#0f172a' }}
+                        labelStyle={{ color: isDarkMode ? '#f8fafc' : '#0f172a' }}
                       />
                       <Scatter name="Cars" data={cars}>
                         {cars.map((entry, index) => (
@@ -311,9 +307,7 @@ function App() {
             </div>
 
             {/* Anomalies Data Table */}
-            {/* Tableau des Anomalies avec Filtres et Pagination */}
             <div className={`rounded-2xl shadow-sm border ${cardTheme} overflow-hidden transition-all`}>
-              
               {/* Header + Search/Filtres */}
               <div className={`p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-100'} flex flex-col md:flex-row justify-between items-center gap-4`}>
                 <h2 className={`text-xl font-bold ${textTheme}`}>Anomaly Details</h2>
@@ -325,7 +319,7 @@ function App() {
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value)
-                      setCurrentPage(1) // N'raj3ouh l'page 1 ki ybda y'cherchi
+                      setCurrentPage(1)
                     }}
                     className={`px-4 py-2 rounded-lg text-sm border focus:ring-2 focus:ring-rose-500 outline-none w-full md:w-48 transition-all ${inputTheme}`}
                   />
@@ -354,7 +348,6 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${isDarkMode ? 'divide-slate-700' : 'divide-slate-100'}`}>
-                    {/* Hna n'khadmo b currentAnomalies au lieu de anomaliesList */}
                     {currentAnomalies.map((anomaly, idx) => (
                       <tr key={idx} className={`${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
                         <td className={`p-4 font-medium ${textTheme}`}>{anomaly.Title}</td>
