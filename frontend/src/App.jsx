@@ -1,198 +1,269 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { ExternalLink, TrendingDown, Car, AlertTriangle, Calculator } from 'lucide-react'
+import { ExternalLink, TrendingDown, Car, AlertTriangle, Calculator, Moon, Sun } from 'lucide-react'
 
-// L'URL ta3 Backend ta3ek li raho f Render
 const API_BASE_URL = "https://car-market-pipeline.onrender.com"
 
 function App() {
   const [stats, setStats] = useState(null)
   const [cars, setCars] = useState([])
   
-  const [marque, setMarque] = useState('Geely')
-  const [annee, setAnnee] = useState(2026)
+  const [brand, setBrand] = useState('Geely')
+  const [year, setYear] = useState(2026)
   const [predictedPrice, setPredictedPrice] = useState(null)
   const [loadingPredict, setLoadingPredict] = useState(false)
+  
+  // Dark Mode State
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/stats`)
       .then(response => setStats(response.data))
-      .catch(error => console.error("Erreur API Stats:", error))
+      .catch(error => console.error("API Stats Error:", error))
 
     axios.get(`${API_BASE_URL}/api/cars?limit=200`)
       .then(response => setCars(response.data))
-      .catch(error => console.error("Erreur API Cars:", error))
+      .catch(error => console.error("API Cars Error:", error))
   }, [])
 
   const handlePredict = (e) => {
     e.preventDefault()
     setLoadingPredict(true)
-    axios.get(`${API_BASE_URL}/api/predict?marque=${marque}&annee=${annee}`)
+    axios.get(`${API_BASE_URL}/api/predict?brand=${brand}&year=${year}`)
       .then(response => {
-        setPredictedPrice(response.data.prix_estime_millions)
+        setPredictedPrice(response.data.estimated_price_millions)
         setLoadingPredict(false)
       })
       .catch(error => {
-        console.error("Erreur Prediction:", error)
+        console.error("Prediction Error:", error)
         setLoadingPredict(false)
       })
   }
 
-  const anomaliesList = cars.filter(car => car.Anomalie === -1)
+  const anomaliesList = cars.filter(car => car.Anomaly === -1)
+
+  // Dynamic Theme Classes
+  const bgTheme = isDarkMode ? "bg-slate-900" : "bg-gray-50"
+  const cardTheme = isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-100"
+  const textTheme = isDarkMode ? "text-slate-100" : "text-slate-800"
+  const subTextTheme = isDarkMode ? "text-slate-400" : "text-slate-500"
+  const inputTheme = isDarkMode ? "bg-slate-700 border-slate-600 text-white" : "bg-white border-gray-300 text-slate-800"
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className={`min-h-screen p-8 transition-colors duration-300 ${bgTheme}`}>
       <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-slate-800">End-to-End Market Intelligence</h1>
-          <p className="text-slate-500 mt-2">Plateforme d'analyse des prix, détection des anomalies et prédiction ML</p>
+        {/* Header & Theme Toggle */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="text-left">
+            <h1 className={`text-4xl font-extrabold tracking-tight transition-colors ${textTheme}`}>
+              End-to-End Market Intelligence
+            </h1>
+            <p className={`mt-2 text-lg transition-colors ${subTextTheme}`}>
+              Price analysis, anomaly detection, and ML prediction platform
+            </p>
+          </div>
+          <button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className={`p-3 rounded-full transition-all duration-300 flex items-center justify-center ${isDarkMode ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400' : 'bg-white hover:bg-slate-100 text-slate-800 shadow-sm'}`}
+            title="Toggle Dark Mode"
+          >
+            {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+          </button>
         </div>
 
         {!stats || cars.length === 0 ? (
-          <div className="text-center py-20 text-xl text-slate-500 animate-pulse">Rana njibou f les données men Render...</div>
+          <div className="flex flex-col items-center justify-center py-32 space-y-4 animate-pulse">
+            <div className={`w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin`}></div>
+            <p className={`text-xl font-medium ${subTextTheme}`}>Fetching data from Render...</p>
+          </div>
         ) : (
-          <>
-            {/* Les Cartes (KPIs) */}
+          <div className="space-y-8 animate-fade-in">
+            {/* KPIs Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500 flex items-center justify-between">
+              <div className={`p-6 rounded-2xl shadow-sm border ${cardTheme} border-t-4 border-t-blue-500 flex items-center justify-between transition-all hover:shadow-md`}>
                 <div>
-                  <h2 className="text-slate-400 text-sm font-bold uppercase tracking-wider">Total Annonces</h2>
-                  <p className="text-3xl font-black text-slate-700 mt-1">{stats.total_cars}</p>
+                  <h2 className="text-blue-500 text-sm font-bold uppercase tracking-wider">Total Listings</h2>
+                  <p className={`text-3xl font-black mt-1 ${textTheme}`}>{stats.total_cars}</p>
                 </div>
-                <Car className="text-blue-200" size={48} />
+                <div className="p-3 bg-blue-500/10 rounded-xl">
+                  <Car className="text-blue-500" size={32} />
+                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-emerald-500 flex items-center justify-between">
+              <div className={`p-6 rounded-2xl shadow-sm border ${cardTheme} border-t-4 border-t-emerald-500 flex items-center justify-between transition-all hover:shadow-md`}>
                 <div>
-                  <h2 className="text-slate-400 text-sm font-bold uppercase tracking-wider">Prix Moyen</h2>
-                  <p className="text-3xl font-black text-slate-700 mt-1">{stats.prix_moyen_millions} M</p>
+                  <h2 className="text-emerald-500 text-sm font-bold uppercase tracking-wider">Average Price</h2>
+                  <p className={`text-3xl font-black mt-1 ${textTheme}`}>{stats.average_price_millions} M</p>
                 </div>
-                <TrendingDown className="text-emerald-200" size={48} />
+                <div className="p-3 bg-emerald-500/10 rounded-xl">
+                  <TrendingDown className="text-emerald-500" size={32} />
+                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-rose-500 flex items-center justify-between">
+              <div className={`p-6 rounded-2xl shadow-sm border ${cardTheme} border-t-4 border-t-rose-500 flex items-center justify-between transition-all hover:shadow-md`}>
                 <div>
-                  <h2 className="text-slate-400 text-sm font-bold uppercase tracking-wider">Anomalies</h2>
-                  <p className="text-3xl font-black text-rose-600 mt-1">{stats.total_anomalies}</p>
+                  <h2 className="text-rose-500 text-sm font-bold uppercase tracking-wider">Anomalies Detected</h2>
+                  <p className="text-3xl font-black text-rose-500 mt-1">{stats.total_anomalies}</p>
                 </div>
-                <AlertTriangle className="text-rose-200" size={48} />
+                <div className="p-3 bg-rose-500/10 rounded-xl">
+                  <AlertTriangle className="text-rose-500" size={32} />
+                </div>
               </div>
             </div>
 
-            {/* Section 2 : ML Predictor & Graphe */}
+            {/* Section 2 : ML Predictor & Graph */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              {/* Formulaire de Prédiction (1 Colonne) */}
-              <div className="bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between">
+              {/* Prediction Form */}
+              <div className={`p-6 rounded-2xl shadow-sm border ${cardTheme} flex flex-col justify-between transition-all`}>
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Calculator className="text-blue-600" size={24} />
-                    <h2 className="text-xl font-bold text-slate-800">Simulateur de Prix</h2>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                      <Calculator className="text-blue-500" size={24} />
+                    </div>
+                    <h2 className={`text-xl font-bold ${textTheme}`}>Price Simulator</h2>
                   </div>
-                  <p className="text-sm text-slate-500 mb-6">Estimez le prix d'une voiture selon sa marque et son année grâce au Machine Learning.</p>
+                  <p className={`text-sm mb-6 ${subTextTheme}`}>
+                    Estimate the price of a vehicle based on its brand and year using Machine Learning.
+                  </p>
                   
-                  <form onSubmit={handlePredict} className="space-y-4">
+                  <form onSubmit={handlePredict} className="space-y-5">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-600 mb-1">Marque</label>
+                      <label className={`block text-sm font-semibold mb-2 ${textTheme}`}>Brand</label>
                       <input 
                         type="text" 
-                        value={marque} 
-                        onChange={(e) => setMarque(e.target.value)}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={brand} 
+                        onChange={(e) => setBrand(e.target.value)}
+                        className={`w-full px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${inputTheme}`}
                         placeholder="Ex: Geely, Skoda, Volkswagen..."
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-slate-600 mb-1">Année</label>
+                      <label className={`block text-sm font-semibold mb-2 ${textTheme}`}>Year</label>
                       <input 
                         type="number" 
-                        value={annee} 
-                        onChange={(e) => setAnnee(e.target.value)}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={year} 
+                        onChange={(e) => setYear(e.target.value)}
+                        className={`w-full px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${inputTheme}`}
                         required
                       />
                     </div>
 
                     <button 
                       type="submit" 
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors cursor-pointer">
-                      {loadingPredict ? "Calcul en cours..." : "Prédire le Prix"}
+                      disabled={loadingPredict}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/30 disabled:opacity-70 disabled:cursor-not-allowed">
+                      {loadingPredict ? "Calculating..." : "Predict Price"}
                     </button>
                   </form>
                 </div>
 
-                {/* Resultat taà la prediction */}
+                {/* Prediction Result */}
                 {predictedPrice !== null && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg text-center animate-fade-in">
-                    <p className="text-xs text-blue-600 uppercase font-bold">Prix Estimé</p>
-                    <p className="text-3xl font-black text-blue-700 mt-1">{predictedPrice} Millions DA</p>
+                  <div className={`mt-6 p-5 border rounded-xl text-center transition-all ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-blue-50 border-blue-100'}`}>
+                    <p className={`text-xs uppercase font-bold tracking-wider ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Estimated Price</p>
+                    <p className={`text-3xl font-black mt-2 ${isDarkMode ? 'text-white' : 'text-blue-700'}`}>
+                      {predictedPrice} <span className="text-xl">M DA</span>
+                    </p>
                   </div>
                 )}
               </div>
 
-              {/* L'Graphe (2 Colonnes) */}
-              <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
-                <h2 className="text-xl font-bold text-slate-800 mb-6">Distribution des Prix par Année</h2>
+              {/* Scatter Chart */}
+              <div className={`lg:col-span-2 p-6 rounded-2xl shadow-sm border ${cardTheme} transition-all`}>
+                <h2 className={`text-xl font-bold mb-6 ${textTheme}`}>Price Distribution by Year</h2>
                 <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" opacity={0.5} />
-                      <XAxis dataKey="Annee" type="number" name="Année" domain={['dataMin', 'dataMax']} tickCount={10} />
-                      <YAxis dataKey="Prix_Millions" type="number" name="Prix (Millions)" unit="M" />
-                      <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                      <Scatter name="Voitures" data={cars}>
+                    <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} stroke={isDarkMode ? '#cbd5e1' : '#64748b'} />
+                      <XAxis 
+                        dataKey="Year" 
+                        type="number" 
+                        name="Year" 
+                        domain={['dataMin', 'dataMax']} 
+                        tickCount={10}
+                        stroke={isDarkMode ? '#94a3b8' : '#475569'} 
+                      />
+                      <YAxis 
+                        dataKey="Price_Millions" 
+                        type="number" 
+                        name="Price (Millions)" 
+                        unit="M" 
+                        stroke={isDarkMode ? '#94a3b8' : '#475569'} 
+                      />
+                      <Tooltip 
+                        cursor={{ strokeDasharray: '3 3' }} 
+                        contentStyle={{ 
+                          backgroundColor: isDarkMode ? '#1e293b' : '#ffffff', 
+                          border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          color: isDarkMode ? '#f8fafc' : '#0f172a'
+                        }}
+                      />
+                      <Scatter name="Cars" data={cars}>
                         {cars.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.Anomalie === -1 ? '#ef4444' : '#3b82f6'} />
+                          <Cell key={`cell-${index}`} fill={entry.Anomaly === -1 ? '#f43f5e' : '#3b82f6'} />
                         ))}
                       </Scatter>
                     </ScatterChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="flex justify-center gap-6 mt-4 text-sm font-medium">
-                  <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div> Prix Normal</span>
-                  <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"></div> Anomalie (A vérifier)</span>
+                <div className={`flex justify-center gap-6 mt-6 text-sm font-medium ${subTextTheme}`}>
+                  <span className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></div> 
+                    Normal Price
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></div> 
+                    Anomaly (Review Required)
+                  </span>
                 </div>
               </div>
 
             </div>
 
-            {/* Tableau des Anomalies */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-slate-100">
-                <h2 className="text-xl font-bold text-slate-800">Détails des Anomalies Détectées (Bonnes Affaires / Arnaques)</h2>
+            {/* Anomalies Data Table */}
+            <div className={`rounded-2xl shadow-sm border ${cardTheme} overflow-hidden transition-all`}>
+              <div className={`p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+                <h2 className={`text-xl font-bold ${textTheme}`}>Anomaly Details (Potential Deals / Scams)</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
-                      <th className="p-4 font-semibold">Titre de l'annonce</th>
-                      <th className="p-4 font-semibold">Année</th>
-                      <th className="p-4 font-semibold">Prix (Millions)</th>
+                    <tr className={`${isDarkMode ? 'bg-slate-800/50 text-slate-400' : 'bg-slate-50 text-slate-500'} text-xs uppercase tracking-wider`}>
+                      <th className="p-4 font-semibold">Listing Title</th>
+                      <th className="p-4 font-semibold">Year</th>
+                      <th className="p-4 font-semibold">Price (Millions)</th>
                       <th className="p-4 font-semibold text-center">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y border-slate-100">
-                    {anomaliesList.map((anomalie, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-4 font-medium text-slate-700">{anomalie.Titre}</td>
-                        <td className="p-4 text-slate-600">{anomalie.Annee}</td>
-                        <td className="p-4 font-bold text-rose-600">{anomalie.Prix_Millions}</td>
+                  <tbody className={`divide-y ${isDarkMode ? 'divide-slate-700' : 'divide-slate-100'}`}>
+                    {anomaliesList.map((anomaly, idx) => (
+                      <tr key={idx} className={`${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
+                        <td className={`p-4 font-medium ${textTheme}`}>{anomaly.Title}</td>
+                        <td className={`p-4 ${subTextTheme}`}>{anomaly.Year}</td>
+                        <td className="p-4 font-bold text-rose-500">{anomaly.Price_Millions}</td>
                         <td className="p-4 text-center">
-                          <a href={anomalie.Lien} target="_blank" rel="noopener noreferrer" 
-                             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-3 py-1 rounded-full transition-colors">
-                            Voir <ExternalLink size={14} />
+                          <a href={anomaly.Link} target="_blank" rel="noopener noreferrer" 
+                             className={`inline-flex items-center gap-1.5 font-medium px-4 py-1.5 rounded-full transition-colors ${
+                               isDarkMode 
+                                ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20' 
+                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                             }`}>
+                            View <ExternalLink size={14} />
                           </a>
                         </td>
                       </tr>
                     ))}
                     {anomaliesList.length === 0 && (
                       <tr>
-                        <td colSpan="4" className="p-8 text-center text-slate-500">Aucune anomalie à afficher pour le moment.</td>
+                        <td colSpan="4" className={`p-8 text-center ${subTextTheme}`}>
+                          No anomalies detected at this time.
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -200,7 +271,7 @@ function App() {
               </div>
             </div>
 
-          </>
+          </div>
         )}
       </div>
     </div>
