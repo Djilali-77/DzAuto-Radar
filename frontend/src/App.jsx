@@ -13,6 +13,11 @@ function App() {
   const [year, setYear] = useState(2026)
   const [predictedPrice, setPredictedPrice] = useState(null)
   const [loadingPredict, setLoadingPredict] = useState(false)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [maxPriceFilter, setMaxPriceFilter] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
   
   // Dark Mode State
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -49,6 +54,28 @@ function App() {
   const textTheme = isDarkMode ? "text-slate-100" : "text-slate-800"
   const subTextTheme = isDarkMode ? "text-slate-400" : "text-slate-500"
   const inputTheme = isDarkMode ? "bg-slate-700 border-slate-600 text-white" : "bg-white border-gray-300 text-slate-800"
+
+  // 1. On récupère les anomalies
+  const baseAnomalies = cars.filter(car => car.Anomaly === -1)
+
+  // 2. On applique les filtres (Recherche par Titre wla Prix Max)
+  const filteredAnomalies = baseAnomalies.filter(car => {
+    const matchesSearch = car.Title.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesPrice = maxPriceFilter ? car.Price_Millions <= Number(maxPriceFilter) : true
+    return matchesSearch && matchesPrice
+  })
+
+  // 3. On calcule la Pagination
+  const totalPages = Math.ceil(filteredAnomalies.length / itemsPerPage)
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  
+  // Hadi hiya la liste li ghadin n'affichiwha f'le tableau
+  const currentAnomalies = filteredAnomalies.slice(indexOfFirstItem, indexOfLastItem)
+
+  // Fonction bach n'badlo la page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+
 
   return (
     <div className={`min-h-screen p-8 transition-colors duration-300 ${bgTheme}`}>
@@ -227,10 +254,38 @@ function App() {
             </div>
 
             {/* Anomalies Data Table */}
+            {/* Tableau des Anomalies avec Filtres et Pagination */}
             <div className={`rounded-2xl shadow-sm border ${cardTheme} overflow-hidden transition-all`}>
-              <div className={`p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
-                <h2 className={`text-xl font-bold ${textTheme}`}>Anomaly Details (Potential Deals / Scams)</h2>
+              
+              {/* Header + Search/Filtres */}
+              <div className={`p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-100'} flex flex-col md:flex-row justify-between items-center gap-4`}>
+                <h2 className={`text-xl font-bold ${textTheme}`}>Anomaly Details</h2>
+                
+                <div className="flex gap-3 w-full md:w-auto">
+                  <input 
+                    type="text" 
+                    placeholder="Chercher une marque..." 
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value)
+                      setCurrentPage(1) // N'raj3ouh l'page 1 ki ybda y'cherchi
+                    }}
+                    className={`px-4 py-2 rounded-lg text-sm border focus:ring-2 focus:ring-rose-500 outline-none w-full md:w-48 transition-all ${inputTheme}`}
+                  />
+                  <input 
+                    type="number" 
+                    placeholder="Prix Max (M)" 
+                    value={maxPriceFilter}
+                    onChange={(e) => {
+                      setMaxPriceFilter(e.target.value)
+                      setCurrentPage(1)
+                    }}
+                    className={`px-4 py-2 rounded-lg text-sm border focus:ring-2 focus:ring-rose-500 outline-none w-full md:w-32 transition-all ${inputTheme}`}
+                  />
+                </div>
               </div>
+
+              {/* Le Tableau */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -242,7 +297,8 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${isDarkMode ? 'divide-slate-700' : 'divide-slate-100'}`}>
-                    {anomaliesList.map((anomaly, idx) => (
+                    {/* Hna n'khadmo b currentAnomalies au lieu de anomaliesList */}
+                    {currentAnomalies.map((anomaly, idx) => (
                       <tr key={idx} className={`${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
                         <td className={`p-4 font-medium ${textTheme}`}>{anomaly.Title}</td>
                         <td className={`p-4 ${subTextTheme}`}>{anomaly.Year}</td>
@@ -259,16 +315,49 @@ function App() {
                         </td>
                       </tr>
                     ))}
-                    {anomaliesList.length === 0 && (
+                    {currentAnomalies.length === 0 && (
                       <tr>
                         <td colSpan="4" className={`p-8 text-center ${subTextTheme}`}>
-                          No anomalies detected at this time.
+                          Aucune anomalie ne correspond à ta recherche.
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
+
+              {/* Les contrôles de Pagination */}
+              {totalPages > 1 && (
+                <div className={`p-4 border-t ${isDarkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'} flex justify-between items-center`}>
+                  <p className={`text-sm ${subTextTheme}`}>
+                    Page <span className="font-bold">{currentPage}</span> sur <span className="font-bold">{totalPages}</span>
+                  </p>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => paginate(currentPage - 1)} 
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        currentPage === 1 
+                          ? 'opacity-50 cursor-not-allowed text-slate-400 bg-transparent' 
+                          : isDarkMode ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-white border hover:bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      Précédent
+                    </button>
+                    <button 
+                      onClick={() => paginate(currentPage + 1)} 
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        currentPage === totalPages 
+                          ? 'opacity-50 cursor-not-allowed text-slate-400 bg-transparent' 
+                          : isDarkMode ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-white border hover:bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      Suivant
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
