@@ -59,16 +59,20 @@ async def extract_cars_data():
             except Exception as e:
                 print(f"Error on page {i}: {e}")
                 continue
-                
-        df = pd.DataFrame(cars_list)
+
         print(f"\n======================================")
-        print(f"Total cars scraped : {len(df)}")
+        print(f"Total cars scraped : {len(cars_list)}")
         print(f"======================================")
         
-        df.to_csv("cars_raw_data_multi.csv", index=False, encoding='utf-8-sig')
-        print("Data saved in 'cars_raw_data_multi.csv'.")
+        # 🆕 On vérifie si on a vraiment trouvé des voitures
+        if len(cars_list) > 0:
+            df = pd.DataFrame(cars_list)
+            df.to_csv("cars_raw_data_multi.csv", index=False, encoding='utf-8-sig')
+            print("✅ Data successfully saved in 'cars_raw_data_multi.csv'.")
+        else:
+            print("⚠️ Anti-bot triggered or no cars found! Keeping the old data.")
         
         await browser.close()
-
+                
 if __name__ == "__main__":
     asyncio.run(extract_cars_data())
