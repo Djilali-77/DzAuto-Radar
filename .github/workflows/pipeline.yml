@@ -28,8 +28,8 @@ jobs:
           pip install -r requirements.txt
           playwright install chromium
 
-      - name: Run Scraper
-        run: python scraper.py
+      - name: Run Scrapper
+        run: python scrapper.py
 
       - name: Clean Data
         run: python cleaner.py
