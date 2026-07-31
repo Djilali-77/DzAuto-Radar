@@ -7,19 +7,20 @@ from sklearn.pipeline import Pipeline
 import joblib
 
 def train_model():
-    print("Fichier ...")
+    print("Loading cleaned data file...")
     df = pd.read_csv("cars_cleaned_data.csv")
     
     if len(df) < 10:
-        print("⚠️ Alert: small amount fo data ")
+        print("⚠️ Warning: Insufficient data to train the model.")
         return
 
-    X = df[['Marque', 'Annee']]
-    y = df['Prix_Millions']
+    X = df[['Brand', 'Year']]
+    y = df['Price_Millions']
 
+    # Preprocessing: OneHotEncode the 'Brand' column
     preprocessor = ColumnTransformer(
         transformers=[
-            ('cat', OneHotEncoder(handle_unknown='ignore'), ['Marque'])
+            ('cat', OneHotEncoder(handle_unknown='ignore'), ['Brand'])
         ],
         remainder='passthrough'
     )
@@ -29,11 +30,11 @@ def train_model():
         ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
     ])
 
-    print("Regression start ...")
+    print("Starting regression model training...")
     model.fit(X, y)
 
     joblib.dump(model, "car_price_model.pkl")
-    print("Done 'car_price_model.pkl'.")
+    print("Model successfully saved as 'car_price_model.pkl'.")
 
 if __name__ == "__main__":
     train_model()

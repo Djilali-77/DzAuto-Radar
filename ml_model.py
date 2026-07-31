@@ -2,30 +2,30 @@ import pandas as pd
 from sklearn.ensemble import IsolationForest
 
 def detect_anomalies():
-    print("Fichier ...")
+    print("Loading cleaned data file...")
     df = pd.read_csv("cars_cleaned_data.csv")
     
     if len(df) < 50:
-        print("⚠️ Alert: small amount fo data ")
+        print("⚠️ Warning: Small amount of data detected. Anomaly detection might not be accurate.")
 
-    
-    X = df[['Annee', 'Prix_Millions']]
+    X = df[['Year', 'Price_Millions']]
 
-    print("\nStarting model ...")
+    print("\nStarting anomaly detection model...")
     model = IsolationForest(contamination=0.1, random_state=42)
 
-    df['Anomalie'] = model.fit_predict(X)
+    df['Anomaly'] = model.fit_predict(X)
 
-    bonnes_affaires = df[df['Anomalie'] == -1]
+    # Isolation Forest labels anomalies as -1
+    good_deals = df[df['Anomaly'] == -1]
     
-    print("\n--- 🚨 Les Anomalies ---")
-    if len(bonnes_affaires) > 0:
-        print(bonnes_affaires[['Titre', 'Annee', 'Prix_Millions']])
+    print("\n--- 🚨 Detected Anomalies / Good Deals ---")
+    if len(good_deals) > 0:
+        print(good_deals[['Title', 'Year', 'Price_Millions']])
     else:
-        print("No anomalies.")
+        print("No anomalies detected.")
 
     df.to_csv("cars_with_predictions.csv", index=False, encoding='utf-8-sig')
-    print("\nDone 'cars_with_predictions.csv'.")
+    print("\nData successfully saved to 'cars_with_predictions.csv'.")
 
 if __name__ == "__main__":
     detect_anomalies()
