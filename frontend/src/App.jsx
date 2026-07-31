@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { ExternalLink, TrendingDown, Car, AlertTriangle, Calculator, Moon, Sun } from 'lucide-react'
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts'
+import { ExternalLink, TrendingDown, Car, AlertTriangle, Calculator, Moon, Sun, Activity } from 'lucide-react'
 
 const API_BASE_URL = "https://car-market-pipeline.onrender.com"
 
@@ -18,6 +18,8 @@ function App() {
   const [maxPriceFilter, setMaxPriceFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
+
+  const [history, setHistory] = useState([])
   
   // Dark Mode State
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -139,6 +141,54 @@ function App() {
                 </div>
               </div>
             </div>
+
+            {/* L'Historique des Prix (Market Trend) */}
+            {history.length > 0 && (
+              <div className={`p-6 rounded-2xl shadow-sm border ${cardTheme} transition-all`}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <Activity className="text-purple-500" size={24} />
+                  </div>
+                  <h2 className={`text-xl font-bold ${textTheme}`}>Market Price Trend (Evolution over time)</h2>
+                </div>
+                
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={history} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} stroke={isDarkMode ? '#cbd5e1' : '#64748b'} />
+                      <XAxis 
+                        dataKey="Date" 
+                        stroke={isDarkMode ? '#94a3b8' : '#475569'} 
+                        tick={{fontSize: 12}}
+                      />
+                      <YAxis 
+                        domain={['auto', 'auto']}
+                        stroke={isDarkMode ? '#94a3b8' : '#475569'} 
+                        unit="M"
+                        tick={{fontSize: 12}}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: isDarkMode ? '#1e293b' : '#ffffff', 
+                          border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          color: isDarkMode ? '#f8fafc' : '#0f172a'
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="Average_Price" 
+                        name="Avg Price (Millions)"
+                        stroke="#a855f7" 
+                        strokeWidth={3}
+                        dot={{ r: 5, fill: "#a855f7", strokeWidth: 2, stroke: isDarkMode ? '#1e293b' : '#ffffff' }}
+                        activeDot={{ r: 8 }} 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
 
             {/* Section 2 : ML Predictor & Graph */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

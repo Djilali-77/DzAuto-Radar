@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import joblib
+import os
 
 app = FastAPI(title="Car Market API", description="API to read car announcements, prices, and anomalies.")
 
@@ -76,6 +77,21 @@ def predict_price(brand: str, year: int):
             "message": "Brand not recognized by the model or prediction failed.", 
             "details": str(e)
         }
+
+@app.get("/api/history")
+def get_history():
+    try:
+        # On lit l'historique
+        df_hist = pd.read_csv("price_history.csv")
+        # S'il y a plusieurs tests le même jour, on regroupe par date pour garder 1 seule ligne par jour
+        df_hist = df_hist.groupby("Date", as_index=False).mean()
+        # On arrondit
+        df_hist["Average_Price"] = df_hist["Average_Price"].round(2)
+        return df_hist.to_dict(orient="records")
+    except FileNotFoundError:
+        # Si le fichier n'existe pas encore
+        return []
+
 
 if __name__ == "__main__":
     import uvicorn

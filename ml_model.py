@@ -1,5 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import IsolationForest
+import datetime
+import os       
 
 def detect_anomalies():
     print("Loading cleaned data file...")
@@ -23,6 +25,21 @@ def detect_anomalies():
         print(good_deals[['Title', 'Year', 'Price_Millions']])
     else:
         print("No anomalies detected.")
+
+
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    avg_price = round(df['Price_Millions'].mean(), 2)
+    
+    history_file = "price_history.csv"
+    history_df = pd.DataFrame([{"Date": today, "Average_Price": avg_price}])
+    
+    # Ki ykoun l'fichier yexisty, n'zidou fih (append). Sinon n'creeyouh.
+    if os.path.exists(history_file):
+        history_df.to_csv(history_file, mode='a', header=False, index=False)
+    else:
+        history_df.to_csv(history_file, index=False)
+    print("Historical average saved.")
+    
 
     df.to_csv("cars_with_predictions.csv", index=False, encoding='utf-8-sig')
     print("\nData successfully saved to 'cars_with_predictions.csv'.")
