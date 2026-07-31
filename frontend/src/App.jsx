@@ -25,13 +25,20 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false)
 
   useEffect(() => {
+    // 1. Fetch Stats
     axios.get(`${API_BASE_URL}/api/stats`)
       .then(response => setStats(response.data))
       .catch(error => console.error("API Stats Error:", error))
 
+    // 2. Fetch Cars
     axios.get(`${API_BASE_URL}/api/cars?limit=200`)
       .then(response => setCars(response.data))
       .catch(error => console.error("API Cars Error:", error))
+
+    // 3. Fetch History (Hadi li kanet khassa !)
+    axios.get(`${API_BASE_URL}/api/history`)
+      .then(response => setHistory(response.data))
+      .catch(error => console.error("API History Error:", error))
   }, [])
 
   const handlePredict = (e) => {
