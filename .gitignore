@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+dist/
+
+# Env files (use the .env.example files as templates)
+.env
+
+# OS / editor
+.DS_Store
+.vscode/
+
+# Generated data and models (rebuilt by the pipeline)
+data/*
+models/*
+!data/.gitkeep
+!models/.gitkeep
