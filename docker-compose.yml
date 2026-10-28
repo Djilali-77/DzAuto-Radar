@@ -1,0 +1,27 @@
+services:
+  backend:
+    build: ./backend
+    container_name: dzauto-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATA_DIR=/app/data
+      - MODELS_DIR=/app/models
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+    volumes:
+      # Keep the CSVs and the trained model on your machine, not inside the container
+      - ./data:/app/data
+      - ./models:/app/models
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: dzauto-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      # The browser (on your machine) calls the API, so this is localhost, not the service name
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
