@@ -78,7 +78,7 @@ DzAuto-Radar
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Djilali-77/car-market-pipeline.git
+git clone https://github.com/Djilali-77/DzAuto-radar.git
 cd car-market-pipeline
 
 # 2. Build and start the containers
@@ -153,15 +153,6 @@ You can also run any step on its own, for example `docker compose exec backend p
 | `GET /api/history` | Daily average market price |
 | `GET /ping` | Health check |
 
-## 🔧 Configuration
-
-| Variable | Used by | Default |
-|---|---|---|
-| `DATA_DIR` | backend | `<project>/data` |
-| `MODELS_DIR` | backend | `<project>/models` |
-| `CORS_ORIGINS` | backend | `http://localhost:5173,http://127.0.0.1:5173` |
-| `VITE_API_URL` | frontend | `http://localhost:8000` |
-
 ## 🛠️ Tech Stack
 
 - **Backend:** Python, FastAPI, Uvicorn
@@ -176,22 +167,6 @@ You can also run any step on its own, for example `docker compose exec backend p
 - The result depends on how many listings are scraped and on Ouedkniss not blocking the scraper.
 - The fair price of a brand with very few listings can be unreliable.
 
-## 🗺️ Roadmap
-
-- [ ] Scrape more fields (model, mileage, fuel, gearbox, wilaya)
-- [ ] Schedule the pipeline daily (cron / GitHub Actions)
-- [ ] Unit tests for the cleaner and the API
-- [ ] Production Docker setup (built frontend served by Nginx)
-- [ ] Price alerts for specific brands
-
-## 🩺 Troubleshooting
-
-| Problem | Solution |
-|---|---|
-| Dashboard says "Data file not found" | Run `docker compose exec backend python run_all.py` |
-| Dashboard says "Cannot reach the API" | Check `docker compose ps` and that port 8000 is free |
-| Scraper stops with "Too many failed pages" | The site is blocking requests. Wait and retry, or use `--skip-scrape` |
-| Styles are missing locally | Check `@import "tailwindcss";` in `src/index.css` and the plugin in `vite.config.js` |
 
 ## 📜 Disclaimer
 
